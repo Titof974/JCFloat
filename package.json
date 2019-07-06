@@ -2,5 +2,8 @@
   "name": "jcfloat",
   "version": "0.0.0",
   "private": true,
-  "dependencies": {}
+  "dependencies": {
+    "@types/d3": "^5.7.2",
+    "d3": "^5.9.7"
+  }
 }
