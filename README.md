@@ -1,3 +1,2 @@
-# jcfloat
-
-[Edit on StackBlitz ⚡️](https://stackblitz.com/edit/jcfloat)
+# JCFloat
+Simple graph based on D3js in typescript

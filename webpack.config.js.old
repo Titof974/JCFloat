@@ -1,0 +1,28 @@
+const path = require('path');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+module.exports = {
+  entry: './demo/index.ts',
+  devtool: "source-map",
+  module: {
+    rules: [
+                {
+                test: /\.tsx?$/,
+                loader: 'ts-loader',
+                exclude: /node_modules/,
+            }
+    ]
+  },
+  resolve: {
+    extensions: [ '.ts', '.js' ]
+  },
+  output: {
+    filename: 'demo.js',
+    path: path.resolve(__dirname, 'demo/points/')
+  },
+  plugins: [
+    new HtmlWebpackPlugin({      // Instancie le plugin
+      template: "./demo/index.html"  // Spécifie notre template
+    })
+  ]
+};
