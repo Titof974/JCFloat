@@ -14,7 +14,7 @@ console.log(dataset);
 console.log(new jcfloat.LinePlot(el, [
     new jcfloat.Metric('test', dataset)
 ], {
-    containerWidth: 500,
+    containerWidth: 1000,
     containerHeight: 500,
     margin: {
         left: 50,

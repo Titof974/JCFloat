@@ -16,6 +16,9 @@ export class LinePlot extends AbstractGraph {
     }
 
     protected init(): void {
+      let _this = this;
+
+
         let width = this.props.containerWidth - this.props.margin.left - this.props.margin.right;
         let height = this.props.containerHeight - this.props.margin.top -  this.props.margin.bottom;
         
@@ -34,14 +37,32 @@ export class LinePlot extends AbstractGraph {
 
 
       // Add X axis --> it is a date format
+      var formatMillisecond = d3.timeFormat("%Q"),
+      formatSecond = d3.timeFormat(":%S"),
+      formatMinute = d3.timeFormat("%I:%M"),
+      formatHour = d3.timeFormat("%I %p"),
+      formatDay = d3.timeFormat("%a %d"),
+      formatWeek = d3.timeFormat("%b %d"),
+      formatMonth = d3.timeFormat("%B"),
+      formatYear = d3.timeFormat("%Y");
+  
+    this.elems.multiFormat = function(date: Date) {
+    return (d3.timeSecond(date) < date ? formatMillisecond
+        : d3.timeMinute(date) < date ? formatSecond
+        : d3.timeHour(date) < date ? formatMinute
+        : d3.timeDay(date) < date ? formatHour
+        : d3.timeMonth(date) < date ? (d3.timeWeek(date) < date ? formatDay : formatWeek)
+        : d3.timeYear(date) < date ? formatMonth
+        : formatYear)(date);
+  }
+
       this.elems.x = d3.scaleTime()
     .domain([this.metrics[0].minX(), this.metrics[0].maxX()])
     .range([ 0, width ]);
 
     this.elems.xAxis = this.elems.svg.append("g")
       .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom( this.elems.x));
-
+      .call(d3.axisBottom( this.elems.x).tickFormat(_this.elems.multiFormat));
     // Add Y axis
     this.elems.y = d3.scaleLinear()
       .domain([0, this.metrics[0].maxY()])
@@ -67,8 +88,6 @@ export class LinePlot extends AbstractGraph {
     // Create the line variable: where both the line and the brush take place
     var line = this.elems.svg.append('g')
       .attr("clip-path", "url(#clip)")
-
-      let _this = this;
 
     // Add the line
     line.append("path")
@@ -112,7 +131,7 @@ export class LinePlot extends AbstractGraph {
       }
 
       // Update axis and line position
-      context.elems.xAxis.transition().duration(1000).call(d3.axisBottom(context.elems.x))
+      context.elems.xAxis.transition().duration(1000).call(d3.axisBottom(context.elems.x).tickFormat(_this.elems.multiFormat))
       line
           .select('.line')
           .transition()
@@ -127,7 +146,7 @@ export class LinePlot extends AbstractGraph {
     // If user double click, reinitialize the chart
     this.elems.svg.on("dblclick",function(){
       _this.elems.x.domain([_this.metrics[0].minX(), _this.metrics[0].maxX()])
-      _this.elems.xAxis.transition().call(d3.axisBottom(_this.elems.x))
+      _this.elems.xAxis.transition().call(d3.axisBottom(_this.elems.x).tickFormat(_this.elems.multiFormat))
       line
         .select('.line')
         .transition()
