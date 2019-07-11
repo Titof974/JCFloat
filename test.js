@@ -1,9 +1,18 @@
 var el = document.getElementById("test");
+var offset = 60000;
+var start_at = 1562796060000;
+var nbpoints = 100;
+var dataset = [];
+function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+
+for(var i = 0; i < nbpoints; i++) {
+    dataset.push(new jcfloat.Point(start_at + offset * i , getRandomInt(10000)))
+}
+console.log(dataset);   
 console.log(new jcfloat.LinePlot(el, [
-    new jcfloat.Metric('test', [
-        new jcfloat.Point(1,1),
-        new jcfloat.Point(2,2),
-    ])
+    new jcfloat.Metric('test', dataset)
 ], {
     containerWidth: 500,
     containerHeight: 500,
