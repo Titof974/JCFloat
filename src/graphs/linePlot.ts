@@ -23,136 +23,121 @@ export class LinePlot extends AbstractGraph {
         // Convert metric to timestamp, number
         this.metrics.forEach(m => m.convert(this.convertPoint));
 
-        // Body of the player
-		this.elems.svg = d3.select(this.chartElement)
-		.append('svg')
-		.attr('width', this.props.containerWidth )
-        .attr('height', this.props.containerHeight);
+        // Chart body
+      this.elems.svg = d3.select(this.chartElement)
+      .append("svg")
+      .attr("width", this.props.containerWidth)
+      .attr("height", this.props.containerHeight)
+      .append("g")
+      .attr("transform",
+            "translate(" +  this.props.margin.left + "," +  this.props.margin.top + ")");
 
-        this.elems.g = this.elems.svg.append('g')
-		.attr('transform', 'translate(' + this.props.margin.left + ', ' + this.props.margin.top + ')')
-        .attr('overflow', 'hidden');
 
-        this.elems.x0 = d3.scaleTime().range([0, width]).domain([this.minXMetrics(), this.maxXMetrics()]);
-        this.elems.y0 = d3.scaleLinear().range([height, 0]).domain([this.minYMetrics(), this.maxYMetrics()]);
-        this.elems.x = d3.scaleTime().range([0, width]).domain([this.minXMetrics(), this.maxXMetrics()]);
-        this.elems.y = d3.scaleLinear().range([height, 0]).domain([this.minYMetrics(), this.maxYMetrics()]);
+      // Add X axis --> it is a date format
+      this.elems.x = d3.scaleTime()
+    .domain([this.metrics[0].minX(), this.metrics[0].maxX()])
+    .range([ 0, width ]);
 
-        this.elems.xAxis = d3.axisBottom(this.elems.x);
-        this.elems.yAxis = d3.axisLeft(this.elems.y);
-      
-        this.elems.g.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .attr("fill", "#000")
-        .call(this.elems.xAxis);
+    this.elems.xAxis = this.elems.svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom( this.elems.x));
 
-        this.elems.g.append("g")
-        .attr("class", "y axis")
-        .attr("fill", "#000")
-        .call(this.elems.yAxis);
+    // Add Y axis
+    this.elems.y = d3.scaleLinear()
+      .domain([0, this.metrics[0].maxY()])
+      .range([ height, 0 ]);
+      this.elems.yAxis = this.elems.svg.append("g")
+      .call(d3.axisLeft(this.elems.y));
+    
 
-        let _this = this;
+    // Add a clipPath: everything out of this area won't be drawn.
+    this.elems.clip = this.elems.svg.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("width", width )
+        .attr("height", height )
+        .attr("x", 0)
+        .attr("y", 0);
 
-        let color = stringToColour(this.metrics[0].get().name);
+    // Add brushing
+    this.elems.brush = d3.brushX()                   // Add the brush feature using the d3.brush function
+        .extent( [ [0,0], [width,height] ] )  // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+        .on("end", updateChart(this))               // Each time the brush selection changes, trigger the 'updateChart' function
 
-        this.elems.g.append("path")
-      .datum(this.metrics[0].get().data)
+    // Create the line variable: where both the line and the brush take place
+    var line = this.elems.svg.append('g')
+      .attr("clip-path", "url(#clip)")
+
+      let _this = this;
+
+    // Add the line
+    line.append("path")
+    .datum(this.metrics[0].get().data)
+          .attr("class", "line")  // I add the class line to be able to modify this line later on.
       .attr("fill", "none")
-      .attr("stroke", color)
+      .attr("stroke", "steelblue")
       .attr("stroke-width", 1.5)
       .attr("d", d3.line()
-        .x(function(d: any) { return _this.elems.x(d.x) })
-        .y(function(d: any) { return _this.elems.y(d.y) })
-        );
+        .x(function(d:any) { return _this.elems.x(d.x) })
+        .y(function(d:any) { return _this.elems.y(d.y) })
+        )
+
+    // Add the brushing
+    line
+      .append("g")
+        .attr("class", "brush")
+        .call(this.elems.brush);
 
 
-        // brush
-        let idleTimeout: any,
-        idleDelay = 350
-        let brush = d3.brush().on("end", brushended(this, zoom));
-        this.elems.g.append("g")
-    .attr("class", "brush")
-    .call(brush);
-        function brushended(context: LinePlot, zoom: any) {
-          return () => {
-            var s = d3.event.selection;
-          if (!s) {
-            if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
-            context.elems.x.domain(context.elems.x0);
-            context.elems.y.domain(context.elems.y0);
-          } else {
-            context.elems.x.domain([s[0][0], s[1][0]].map(context.elems.x.invert, context.elems.x));
-            context.elems.y.domain([s[1][1], s[0][1]].map(context.elems.y.invert, context.elems.y));
-            context.elems.svg.select(".brush").call(brush.move, null);
-          }
-          zoom(context)();
-          }
-          
+
+    // A function that set idleTimeOut to null
+    let idleTimeout: any;
+    function idled() { idleTimeout = null; }
+
+
+    // A function that update the chart for given boundaries
+    function updateChart(context: any) {
+      return () => {
+
+      // What are the selected boundaries?
+      let extent = d3.event.selection
+
+      // If no selection, back to initial coordinate. Otherwise, update X axis domain
+      if(!extent){
+        if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
+        context.elems.x.domain([ 4,8])
+      }else{
+        context.elems.x.domain([ context.elems.x.invert(extent[0]), context.elems.x.invert(extent[1]) ])
+        line.select(".brush").call(context.elems.brush.move, null) // This remove the grey brush area as soon as the selection has been done
+      }
+
+      // Update axis and line position
+      context.elems.xAxis.transition().duration(1000).call(d3.axisBottom(context.elems.x))
+      line
+          .select('.line')
+          .transition()
+          .duration(1000)
+          .attr("d", d3.line()
+            .x(function(d: any) { return context.elems.x(d.x) })
+            .y(function(d: any) { return context.elems.y(d.y) })
+          )
         }
+    }
 
-        
-function zoom(context: LinePlot) {
-  return () => {
-    var t = context.elems.svg.transition().duration(750);
-    context.elems.svg.select(".axis--x").transition(t).call(context.elems.xAxis);
-    context.elems.svg.select(".axis--y").transition(t).call(context.elems.yAxis);
-    context.elems.svg.selectAll("circle").transition(t)
-        .attr("cx", function(d: any) { return context.elems.x(d.x); })
-        .attr("cy", function(d: any) { return context.elems.y(d.y); });
-  }
-}
-
-        function idled() {
-          idleTimeout = null;
-        }
-        
-        
-
-          // create a tooltip
-let Tooltip = d3.select(this.chartElement)
-  .append("div")
-  .style("opacity", 0)
-  .attr("class", "tooltip")
-  .style("background-color", "white")
-  .style("border", "solid")
-  .style("border-width", "2px")
-  .style("border-radius", "5px")
-  .style("padding", "5px")
-  .style("position", "absolute");
+    // If user double click, reinitialize the chart
+    this.elems.svg.on("dblclick",function(){
+      _this.elems.x.domain([_this.metrics[0].minX(), _this.metrics[0].maxX()])
+      _this.elems.xAxis.transition().call(d3.axisBottom(_this.elems.x))
+      line
+        .select('.line')
+        .transition()
+        .attr("d", d3.line()
+          .x(function(d: any) { return _this.elems.x(d.x) })
+          .y(function(d: any) { return _this.elems.y(d.y) })
+      )
+    });
 
 
-  var mouseover = function(d: any, i: number, group: any) {
-    Tooltip
-      .style("opacity", 1)
-    d3.select(group[i])
-      .style("stroke", "black")
-      .style("opacity", 1)
-  }
-  var mousemove = function(d: any, i: number, group: any) {
-    Tooltip
-      .html("The exact value of<br>this cell is: " + d.x)
-      .style("left", (d3.mouse(group[i])[0]+70) + "px")
-      .style("top", (d3.mouse(group[i])[1]) + "px")
-  }
-  var mouseleave = function(d: any, i: number, group: any) {
-    Tooltip
-      .style("opacity", 0)
-    d3.select(group[i])
-      .style("stroke", color)
-  }
-
-
-        this.elems.g.selectAll(".dot")
-        .data(this.metrics[0].get().data)
-      .enter().append("circle") 
-            .attr("fill", "white")
-        .attr("stroke", color) 
-        .attr("cx", function(d: any) { return _this.elems.x(d.x) })
-        .attr("cy",function(d: any) { return _this.elems.y(d.y) })
-        .attr("r",5)    .on("mouseover", mouseover)
-        .on("mousemove", mousemove)
-        .on("mouseleave", mouseleave)
     }
 
 }
