@@ -5,10 +5,12 @@ console.log(new jcfloat.LinePlot(el, [
         new jcfloat.Point(2,2),
     ])
 ], {
-    containerWidth: 100,
-    containerHeight: 200,
+    containerWidth: 500,
+    containerHeight: 500,
     margin: {
-        left: 10,
-        top: 10
+        left: 50,
+        top: 50,
+        bottom: 50,
+        right : 50,
     }
 }));
