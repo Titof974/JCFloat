@@ -1,7 +1,7 @@
 var el = document.getElementById("test");
 var offset = 60000;
 var start_at = 1562796060000;
-var nbpoints = 100;
+var nbpoints = 10000;
 var dataset = [];
 function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
