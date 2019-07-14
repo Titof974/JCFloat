@@ -62,8 +62,9 @@ export class LinePlot extends AbstractGraph {
 
     this.elems.xAxis = this.elems.svg.append("g")
       .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom( this.elems.x).tickFormat(_this.elems.multiFormat));
-    // Add Y axis
+      .call(d3.axisBottom( this.elems.x).tickFormat(_this.elems.multiFormat))
+;
+          // Add Y axis
     this.elems.y = d3.scaleLinear()
       .domain([0, this.metrics[0].maxY()])
       .range([ height, 0 ]);
@@ -126,12 +127,18 @@ export class LinePlot extends AbstractGraph {
         if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
         context.elems.x.domain([ 4,8])
       }else{
-        context.elems.x.domain([ context.elems.x.invert(extent[0]), context.elems.x.invert(extent[1]) ])
+        context.elems.x.domain([ context.elems.x.invert(extent[0]), context.elems.x.invert(extent[1]) ]);
         line.select(".brush").call(context.elems.brush.move, null) // This remove the grey brush area as soon as the selection has been done
       }
 
       // Update axis and line position
       context.elems.xAxis.transition().duration(1000).call(d3.axisBottom(context.elems.x).tickFormat(_this.elems.multiFormat))
+      .selectAll("text")	
+      .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(-65)" );
+            
       line
           .select('.line')
           .transition()

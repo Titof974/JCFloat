@@ -19,7 +19,7 @@ console.log(new jcfloat.LinePlot(el, [
     margin: {
         left: 50,
         top: 50,
-        bottom: 50,
+        bottom: 100,
         right : 50,
     }
 }));
