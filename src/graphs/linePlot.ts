@@ -18,6 +18,7 @@ export class LinePlot extends AbstractGraph {
     protected init(): void {
       let _this = this;
 
+      
 
         let width = this.props.containerWidth - this.props.margin.left - this.props.margin.right;
         let height = this.props.containerHeight - this.props.margin.top -  this.props.margin.bottom - 150;
@@ -25,6 +26,7 @@ export class LinePlot extends AbstractGraph {
 
         // Convert metric to timestamp, number
         this.metrics.forEach(m => m.convert(this.convertPoint));
+
 
         // Chart body
       this.elems.svg = d3.select(this.chartElement)
@@ -55,6 +57,39 @@ export class LinePlot extends AbstractGraph {
         : d3.timeYear(date) < date ? formatMonth
         : formatYear)(date);
   }
+
+                // create a tooltip
+let Tooltip = d3.select(this.chartElement)
+.append("div")
+.style("opacity", 0)
+.attr("class", "tooltip")
+.style("background-color", "white")
+.style("border", "solid")
+.style("border-width", "2px")
+.style("border-radius", "5px")
+.style("padding", "5px")
+.style("position", "absolute");
+
+
+var mouseover = function(d: any, i: number, group: any) {
+  Tooltip
+    .style("opacity", 1)
+  d3.select(group[i])
+    .style("stroke", "black")
+    .style("opacity", 1)
+}
+var mousemove = function(d: any, i: number, group: any) {
+  Tooltip
+    .html("The exact value of<br>this cell is: " + d.x)
+    .style("left", (d3.mouse(group[i])[0]+70) + "px")
+    .style("top", (d3.mouse(group[i])[1]) + "px")
+}
+var mouseleave = function(d: any, i: number, group: any) {
+  Tooltip
+    .style("opacity", 0)
+  d3.select(group[i])
+    .style("stroke", "red")
+}
 
     // Add X axis
 
@@ -126,6 +161,18 @@ export class LinePlot extends AbstractGraph {
         .attr("class", "brush")
         .call(this.elems.brush);
 
+        line.selectAll(".dot")
+                .data(this.metrics[0].get().data)
+              .enter().append("circle") 
+                    .attr("fill", "white")
+                .attr("stroke", "red") 
+                .attr("cx", function(d: any) { return _this.elems.x(d.x) })
+                .attr("cy",function(d: any) { return _this.elems.y(d.y) })
+                .attr("r",5)
+                .on("mouseover", mouseover)
+                        .on("mousemove", mousemove)
+                        .on("mouseleave", mouseleave)
+
 
         
     this.elems.context = this.elems.svg.append("g")
@@ -165,14 +212,20 @@ export class LinePlot extends AbstractGraph {
               .attr("dy", ".15em")
               .attr("transform", "rotate(-65)" );
 
+              var t = _this.elems.svg.transition().duration(750);
+
               line
               .select('.line')
-              .transition()
-              .duration(1000)
+              .transition(t)
               .attr("d", d3.line()
                 .x(function(d: any) { return _this.elems.x(d.x) })
                 .y(function(d: any) { return _this.elems.y(d.y) })
               )
+
+              line.selectAll("circle")
+              .transition(t)
+              .attr("cx", function(d: any) { return _this.elems.x(d.x); })
+              .attr("cy", function(d: any) { return _this.elems.y(d.y); });
     
           }
 
@@ -188,9 +241,7 @@ export class LinePlot extends AbstractGraph {
     // A function that update the chart for given boundaries
     function updateChart(context: any) {
       return () => {
-        if (d3.event.sele)
-        console.log("update");
-        console.log(d3.event);
+        var t = context.elems.svg.transition().duration(750);
       // What are the selected boundaries?
       let extent = d3.event.selection;
 
@@ -207,7 +258,7 @@ export class LinePlot extends AbstractGraph {
       }
 
       // Update axis and line position
-      context.elems.xAxis.transition().duration(1000).call(d3.axisBottom(context.elems.x).tickFormat(_this.elems.multiFormat))
+      context.elems.xAxis.transition(t).call(d3.axisBottom(context.elems.x).tickFormat(_this.elems.multiFormat))
       .selectAll("text")	
       .style("text-anchor", "end")
             .attr("dx", "-.8em")
@@ -216,13 +267,20 @@ export class LinePlot extends AbstractGraph {
 
       line
           .select('.line')
-          .transition()
-          .duration(1000)
+          .transition(t)
           .attr("d", d3.line()
             .x(function(d: any) { return context.elems.x(d.x) })
             .y(function(d: any) { return context.elems.y(d.y) })
-          )
+          );
+
+
+          line.selectAll("circle")
+          .transition(t)
+          .attr("cx", function(d: any) { return context.elems.x(d.x); })
+          .attr("cy", function(d: any) { return context.elems.y(d.y); });
         }
+
+
       
     }
 
@@ -232,6 +290,7 @@ export class LinePlot extends AbstractGraph {
       _this.elems.gBrush2.call(_this.elems.brush2.move, _this.elems.x2.range());
 
     });
+
 
 
     }
