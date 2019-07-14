@@ -161,7 +161,7 @@ var mouseleave = function(d: any, i: number, group: any) {
         .attr("class", "brush")
         .call(this.elems.brush);
 
-        line.selectAll(".dot")
+       this.elems.circles = line.selectAll(".dot")
                 .data(this.metrics[0].get().data)
               .enter().append("circle") 
                     .attr("fill", "white")
@@ -172,6 +172,16 @@ var mouseleave = function(d: any, i: number, group: any) {
                 .on("mouseover", mouseover)
                         .on("mousemove", mousemove)
                         .on("mouseleave", mouseleave)
+                        .on('mousedown', function(){
+                          let brush_elm = _this.elems.svg.select(".brush").node();
+                          let new_click_event = new Event('mousedown') as any;
+                          new_click_event.pageX = d3.event.pageX;
+                          new_click_event.clientX = d3.event.clientX;
+                          new_click_event.pageY = d3.event.pageY;
+                          new_click_event.clientY = d3.event.clientY;
+                          brush_elm.dispatchEvent(new_click_event);
+                        });
+                        
 
 
         
