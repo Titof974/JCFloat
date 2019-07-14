@@ -155,7 +155,7 @@ export class LinePlot extends AbstractGraph {
         function brushed2() {
           if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
           var s = d3.event.selection;
-          _this.elems.x.domain([ _this.elems.x.invert(s[0]), _this.elems.x.invert(s[1]) ]);
+          _this.elems.x.domain([ _this.elems.x2.invert(s[0]), _this.elems.x2.invert(s[1]) ]);
           // Update axis and line position
           _this.elems.xAxis.transition().duration(1000).call(d3.axisBottom(_this.elems.x).tickFormat(_this.elems.multiFormat))
       .selectAll("text")	
