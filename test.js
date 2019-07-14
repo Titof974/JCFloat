@@ -1,7 +1,7 @@
 var el = document.getElementById("test");
-var offset = 60000;
+var offset = 600000;
 var start_at = 1562796060000;
-var nbpoints = 10000;
+var nbpoints = 1000;
 var dataset = [];
 function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
@@ -16,7 +16,7 @@ console.log(new jcfloat.LinePlot(el, [
 ], {
     containerWidth: 1000,
     containerHeight: 500,
-    margin: {
+        margin: {
         left: 50,
         top: 50,
         bottom: 100,

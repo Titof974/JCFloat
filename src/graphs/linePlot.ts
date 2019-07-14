@@ -155,24 +155,28 @@ export class LinePlot extends AbstractGraph {
         function brushed2() {
           if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
           var s = d3.event.selection;
-          _this.elems.x.domain([ _this.elems.x2.invert(s[0]), _this.elems.x2.invert(s[1]) ]);
-          // Update axis and line position
-          _this.elems.xAxis.transition().duration(1000).call(d3.axisBottom(_this.elems.x).tickFormat(_this.elems.multiFormat))
-      .selectAll("text")	
-      .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", ".15em")
-            .attr("transform", "rotate(-65)" );
+          if (s) {
+            _this.elems.x.domain([ _this.elems.x2.invert(s[0]), _this.elems.x2.invert(s[1]) ]);
+            // Update axis and line position
+            _this.elems.xAxis.transition().duration(1000).call(d3.axisBottom(_this.elems.x).tickFormat(_this.elems.multiFormat))
+        .selectAll("text")	
+        .style("text-anchor", "end")
+              .attr("dx", "-.8em")
+              .attr("dy", ".15em")
+              .attr("transform", "rotate(-65)" );
 
-      line
-          .select('.line')
-          .transition()
-          .duration(1000)
-          .attr("d", d3.line()
-            .x(function(d: any) { return _this.elems.x(d.x) })
-            .y(function(d: any) { return _this.elems.y(d.y) })
-          )
+              line
+              .select('.line')
+              .transition()
+              .duration(1000)
+              .attr("d", d3.line()
+                .x(function(d: any) { return _this.elems.x(d.x) })
+                .y(function(d: any) { return _this.elems.y(d.y) })
+              )
+    
+          }
 
+     
         }
         
 
@@ -196,7 +200,6 @@ export class LinePlot extends AbstractGraph {
       }else{
         context.elems.x.domain([ context.elems.x.invert(extent[0]), context.elems.x.invert(extent[1]) ]);
         context.elems.gBrush2.transition()
-        .duration(1000)
         .call(context.elems.brush2.move,[ context.elems.x2(context.elems.x.invert(extent[0])), context.elems.x2(context.elems.x.invert(extent[1])) ]);
 
         line.select(".brush").call(context.elems.brush.move, null) // This remove the grey brush area as soon as the selection has been done
@@ -226,7 +229,7 @@ export class LinePlot extends AbstractGraph {
     this.elems.svg.on("dblclick",function(){
       _this.elems.x.domain([_this.metrics[0].minX(), _this.metrics[0].maxX()]);
       _this.elems.xAxis.transition().call(d3.axisBottom(_this.elems.x).tickFormat(_this.elems.multiFormat))
-      _this.elems.gBrush2.transition().duration(1000).call(_this.elems.brush2.move, _this.elems.x2.range());
+      _this.elems.gBrush2.transition().call(_this.elems.brush2.move, _this.elems.x2.range());
 
       line
         .select('.line')
