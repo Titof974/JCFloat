@@ -20,8 +20,8 @@ export class LinePlot extends AbstractGraph {
 
 
         let width = this.props.containerWidth - this.props.margin.left - this.props.margin.right;
-        let height = this.props.containerHeight - this.props.margin.top -  this.props.margin.bottom;
-        
+        let height = this.props.containerHeight - this.props.margin.top -  this.props.margin.bottom - 150;
+        let height2 = this.props.containerHeight - this.props.margin.top -  this.props.margin.bottom;
 
         // Convert metric to timestamp, number
         this.metrics.forEach(m => m.convert(this.convertPoint));
@@ -56,21 +56,39 @@ export class LinePlot extends AbstractGraph {
         : formatYear)(date);
   }
 
-      this.elems.x = d3.scaleTime()
+    // Add X axis
+
+    this.elems.x = d3.scaleTime()
     .domain([this.metrics[0].minX(), this.metrics[0].maxX()])
     .range([ 0, width ]);
 
     this.elems.xAxis = this.elems.svg.append("g")
       .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom( this.elems.x).tickFormat(_this.elems.multiFormat))
-;
-          // Add Y axis
+      .call(d3.axisBottom( this.elems.x).tickFormat(_this.elems.multiFormat));
+
+    // Add X axis preview
+
+    this.elems.x2 = d3.scaleTime()
+    .domain([this.metrics[0].minX(), this.metrics[0].maxX()])
+    .range([ 0, width ]);
+
+    this.elems.xAxis2 = this.elems.svg.append("g")
+    .attr("transform", "translate(0," + height2 + ")")
+      .call(d3.axisBottom( this.elems.x2).tickFormat(_this.elems.multiFormat));
+
+
+
+    // Add Y axis
     this.elems.y = d3.scaleLinear()
       .domain([0, this.metrics[0].maxY()])
       .range([ height, 0 ]);
       this.elems.yAxis = this.elems.svg.append("g")
       .call(d3.axisLeft(this.elems.y));
     
+      // Add Y Preview
+      this.elems.y2 = d3.scaleLinear()
+      .domain([0, this.metrics[0].maxY()])
+      .range([ 100, 0 ]);
 
     // Add a clipPath: everything out of this area won't be drawn.
     this.elems.clip = this.elems.svg.append("defs").append("svg:clipPath")
@@ -88,7 +106,7 @@ export class LinePlot extends AbstractGraph {
 
     // Create the line variable: where both the line and the brush take place
     var line = this.elems.svg.append('g')
-      .attr("clip-path", "url(#clip)")
+      .attr("clip-path", "url(#clip)");
 
     // Add the line
     line.append("path")
@@ -109,6 +127,41 @@ export class LinePlot extends AbstractGraph {
         .call(this.elems.brush);
 
 
+        
+    this.elems.context = this.elems.svg.append("g")
+    .attr("class", "context")
+    .attr("transform", "translate(" + 0 + "," + 250 + ")");
+
+    // Add the line
+    this.elems.context.append("path")
+    .datum(this.metrics[0].get().data)
+          .attr("class", "line")  // I add the class line to be able to modify this line later on.
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d:any) { return _this.elems.x2(d.x) })
+        .y(function(d:any) { return _this.elems.y2(d.y) })
+        )
+
+        this.elems.brush2 = d3.brushX()
+        .extent([[0, 0], [width, 100]]);
+
+        this.elems.gBrush2 = this.elems.context.append("g")
+        .attr("class", "brush2")
+        .call(this.elems.brush2)
+        .call(this.elems.brush2.move, this.elems.x.range());
+
+        function brushed2() {
+          if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+          // var s = d3.event.selection || _this.elems.x2.range();
+          // _this.elems.x.domain(s.map(_this.elems.x2.invert, _this.elems.x2));
+          // _this.elems.line.select(".line").attr("d", line);
+          // _this.elems.svg.select(".zoom").call(_this.elems.zoom.transform, d3.zoomIdentity
+          //     .scale(width / (s[1] - s[0]))
+          //     .translate(-s[0], 0));
+        }
+        
 
     // A function that set idleTimeOut to null
     let idleTimeout: any;
@@ -120,7 +173,9 @@ export class LinePlot extends AbstractGraph {
       return () => {
 
       // What are the selected boundaries?
-      let extent = d3.event.selection
+      let extent = d3.event.selection;
+
+      
 
       // If no selection, back to initial coordinate. Otherwise, update X axis domain
       if(!extent){
@@ -138,7 +193,7 @@ export class LinePlot extends AbstractGraph {
             .attr("dx", "-.8em")
             .attr("dy", ".15em")
             .attr("transform", "rotate(-65)" );
-            
+
       line
           .select('.line')
           .transition()
@@ -148,6 +203,7 @@ export class LinePlot extends AbstractGraph {
             .y(function(d: any) { return context.elems.y(d.y) })
           )
         }
+      
     }
 
     // If user double click, reinitialize the chart

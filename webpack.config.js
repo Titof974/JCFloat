@@ -16,9 +16,9 @@ const TerserPlugin = require('terser-webpack-plugin');
     resolve: {
       extensions: [ '.tsx', '.ts', '.js' ]
     },
-    optimization: {
-      minimizer: [new TerserPlugin()],
-    },
+    // optimization: {
+    //   minimizer: [new TerserPlugin()],
+    // },
     output: {
       filename: 'lib.js',
       libraryTarget: 'umd',
