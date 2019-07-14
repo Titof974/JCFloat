@@ -145,21 +145,34 @@ export class LinePlot extends AbstractGraph {
         )
 
         this.elems.brush2 = d3.brushX()
-        .extent([[0, 0], [width, 100]]);
+        .extent([[0, 0], [width, 100]]).on("start brush end", brushed2);
 
         this.elems.gBrush2 = this.elems.context.append("g")
         .attr("class", "brush2")
         .call(this.elems.brush2)
-        .call(this.elems.brush2.move, this.elems.x.range());
+        .call(this.elems.brush2.move, this.elems.x2.range());
 
         function brushed2() {
           if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-          // var s = d3.event.selection || _this.elems.x2.range();
-          // _this.elems.x.domain(s.map(_this.elems.x2.invert, _this.elems.x2));
-          // _this.elems.line.select(".line").attr("d", line);
-          // _this.elems.svg.select(".zoom").call(_this.elems.zoom.transform, d3.zoomIdentity
-          //     .scale(width / (s[1] - s[0]))
-          //     .translate(-s[0], 0));
+          var s = d3.event.selection;
+          _this.elems.x.domain([ _this.elems.x.invert(s[0]), _this.elems.x.invert(s[1]) ]);
+          // Update axis and line position
+          _this.elems.xAxis.transition().duration(1000).call(d3.axisBottom(_this.elems.x).tickFormat(_this.elems.multiFormat))
+      .selectAll("text")	
+      .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(-65)" );
+
+      line
+          .select('.line')
+          .transition()
+          .duration(1000)
+          .attr("d", d3.line()
+            .x(function(d: any) { return _this.elems.x(d.x) })
+            .y(function(d: any) { return _this.elems.y(d.y) })
+          )
+
         }
         
 
@@ -175,14 +188,17 @@ export class LinePlot extends AbstractGraph {
       // What are the selected boundaries?
       let extent = d3.event.selection;
 
-      
 
       // If no selection, back to initial coordinate. Otherwise, update X axis domain
       if(!extent){
         if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
-        context.elems.x.domain([ 4,8])
+        context.elems.x.domain([ 4,8]);
       }else{
         context.elems.x.domain([ context.elems.x.invert(extent[0]), context.elems.x.invert(extent[1]) ]);
+        context.elems.gBrush2.transition()
+        .duration(1000)
+        .call(context.elems.brush2.move,[ context.elems.x2(context.elems.x.invert(extent[0])), context.elems.x2(context.elems.x.invert(extent[1])) ]);
+
         line.select(".brush").call(context.elems.brush.move, null) // This remove the grey brush area as soon as the selection has been done
       }
 
@@ -208,14 +224,18 @@ export class LinePlot extends AbstractGraph {
 
     // If user double click, reinitialize the chart
     this.elems.svg.on("dblclick",function(){
-      _this.elems.x.domain([_this.metrics[0].minX(), _this.metrics[0].maxX()])
+      _this.elems.x.domain([_this.metrics[0].minX(), _this.metrics[0].maxX()]);
       _this.elems.xAxis.transition().call(d3.axisBottom(_this.elems.x).tickFormat(_this.elems.multiFormat))
+      _this.elems.gBrush2.transition().duration(1000).call(_this.elems.brush2.move, _this.elems.x2.range());
+
       line
         .select('.line')
         .transition()
         .attr("d", d3.line()
           .x(function(d: any) { return _this.elems.x(d.x) })
           .y(function(d: any) { return _this.elems.y(d.y) })
+
+
       )
     });
 
