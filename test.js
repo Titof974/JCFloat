@@ -1,5 +1,5 @@
 var el = document.getElementById("test");
-var offset = 600000;
+var offset = 12000000;
 var start_at = 1562796060000;
 var nbpoints = 1000;
 var dataset = [];

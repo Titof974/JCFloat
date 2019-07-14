@@ -204,15 +204,17 @@ var mouseleave = function(d: any, i: number, group: any) {
           var s = d3.event.selection;
           if (s) {
             _this.elems.x.domain([ _this.elems.x2.invert(s[0]), _this.elems.x2.invert(s[1]) ]);
+
+            var t = _this.elems.svg.transition().duration(750);
+
             // Update axis and line position
-            _this.elems.xAxis.transition().duration(1000).call(d3.axisBottom(_this.elems.x).tickFormat(_this.elems.multiFormat))
+            _this.elems.xAxis.transition(t).call(d3.axisBottom(_this.elems.x).tickFormat(_this.elems.multiFormat))
         .selectAll("text")	
         .style("text-anchor", "end")
               .attr("dx", "-.8em")
               .attr("dy", ".15em")
               .attr("transform", "rotate(-65)" );
 
-              var t = _this.elems.svg.transition().duration(750);
 
               line
               .select('.line')
