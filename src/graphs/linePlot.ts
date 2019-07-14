@@ -188,15 +188,16 @@ export class LinePlot extends AbstractGraph {
     // A function that update the chart for given boundaries
     function updateChart(context: any) {
       return () => {
-
+        if (d3.event.sele)
+        console.log("update");
+        console.log(d3.event);
       // What are the selected boundaries?
       let extent = d3.event.selection;
 
 
       // If no selection, back to initial coordinate. Otherwise, update X axis domain
       if(!extent){
-        if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
-        context.elems.x.domain([ 4,8]);
+        return;
       }else{
         context.elems.x.domain([ context.elems.x.invert(extent[0]), context.elems.x.invert(extent[1]) ]);
         context.elems.gBrush2.transition()
@@ -227,19 +228,9 @@ export class LinePlot extends AbstractGraph {
 
     // If user double click, reinitialize the chart
     this.elems.svg.on("dblclick",function(){
-      _this.elems.x.domain([_this.metrics[0].minX(), _this.metrics[0].maxX()]);
-      _this.elems.xAxis.transition().call(d3.axisBottom(_this.elems.x).tickFormat(_this.elems.multiFormat))
-      _this.elems.gBrush2.transition().call(_this.elems.brush2.move, _this.elems.x2.range());
 
-      line
-        .select('.line')
-        .transition()
-        .attr("d", d3.line()
-          .x(function(d: any) { return _this.elems.x(d.x) })
-          .y(function(d: any) { return _this.elems.y(d.y) })
+      _this.elems.gBrush2.call(_this.elems.brush2.move, _this.elems.x2.range());
 
-
-      )
     });
 
 
