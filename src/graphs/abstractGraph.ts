@@ -15,23 +15,58 @@ export abstract class AbstractGraph {
     protected abstract init(): void;
 
     protected maxXMetrics(): number{
-        return Math.max(...this.metrics.map(m => m.maxX()));
+        let max: number = -Infinity;
+        for (let index = 0; index < this.metrics.length; index++) {
+            const metric = this.metrics[index];
+            if (metric.maxX() > max) {
+                max = metric.maxX();
+            }
+        }
+        return max;
     }
 
     protected maxYMetrics(): number{
-        return Math.max(...this.metrics.map(m => m.maxY()));
+        let max: number = -Infinity;
+        for (let index = 0; index < this.metrics.length; index++) {
+            const metric = this.metrics[index];
+            if (metric.maxY() > max) {
+                max = metric.maxY();
+            }
+        }
+        return max;
     }
 
     protected minXMetrics(): number{
-        return Math.min(...this.metrics.map(m => m.minX()));
+        let min: number = +Infinity;
+        for (let index = 0; index < this.metrics.length; index++) {
+            const metric = this.metrics[index];
+            if (metric.minX() < min) {
+                min = metric.minX();
+            }
+        }
+        return min;
     }
 
     protected minYMetrics(): number{
-        return Math.min(...this.metrics.map(m => m.minY()));
+        let min: number = +Infinity;
+        for (let index = 0; index < this.metrics.length; index++) {
+            const metric = this.metrics[index];
+            if (metric.minY() < min) {
+                min = metric.minY();
+            }
+        }
+        return min;
     }
 
     protected maxSize(): number{
-        return Math.max(...this.metrics.map(m => m.size()));
+        let max: number = 0;
+        for (let index = 0; index < this.metrics.length; index++) {
+            const metric = this.metrics[index];
+            if (metric.size() > max) {
+                max = metric.size();
+            }
+        }
+        return max;
     }
     
 }

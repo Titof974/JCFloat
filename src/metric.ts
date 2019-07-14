@@ -23,19 +23,47 @@ class Metric {
     }
 
     maxX(): number {
-        return Math.max(...this.metric.data.map(d => d.x));
+        let max: number = -Infinity;
+        for (let index = 0; index < this.metric.data.length; index++) {
+            const item = this.metric.data[index];
+            if (item.x > max) {
+                max = item.x;
+            }
+        }
+        return max;
     }
 
     maxY(): number {
-        return Math.max(...this.metric.data.map(d => d.y));
+        let max: number = -Infinity;
+        for (let index = 0; index < this.metric.data.length; index++) {
+            const item = this.metric.data[index];
+            if (item.y > max) {
+                max = item.y;
+            }
+        }
+        return max;
     }
 
     minX(): number {
-        return Math.min(...this.metric.data.map(d => d.x));
+        let min: number = +Infinity;
+        for (let index = 0; index < this.metric.data.length; index++) {
+            const item = this.metric.data[index];
+            if (item.x < min) {
+                min = item.x;
+            }
+        }
+        return min;
     }
 
     minY(): number {
-        return Math.min(...this.metric.data.map(d => d.y));
+        let min: number = +Infinity;
+        for (let index = 0; index < this.metric.data.length; index++) {
+            const item = this.metric.data[index];
+            if (item.y < min) {
+                min = item.y;
+            }
+        }
+        return min;
     }
 
     convert(cb: (p: IPoint) => IPoint) {
