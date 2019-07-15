@@ -88,7 +88,7 @@ var mouseleave = function(d: any, i: number, group: any) {
   Tooltip
     .style("opacity", 0)
   d3.select(group[i])
-    .style("stroke", "red")
+    .style("stroke", stringToColour(_this.metrics[0].get().name))
 }
 
     // Add X axis
@@ -148,7 +148,7 @@ var mouseleave = function(d: any, i: number, group: any) {
     .datum(this.metrics[0].get().data)
           .attr("class", "line")  // I add the class line to be able to modify this line later on.
       .attr("fill", "none")
-      .attr("stroke", "steelblue")
+      .attr("stroke", stringToColour(_this.metrics[0].get().name))
       .attr("stroke-width", 1.5)
       .attr("d", d3.line()
         .x(function(d:any) { return _this.elems.x(d.x) })
@@ -165,7 +165,7 @@ var mouseleave = function(d: any, i: number, group: any) {
                 .data(this.metrics[0].get().data)
               .enter().append("circle") 
                     .attr("fill", "white")
-                .attr("stroke", "red") 
+                .attr("stroke", stringToColour(_this.metrics[0].get().name)) 
                 .attr("cx", function(d: any) { return _this.elems.x(d.x) })
                 .attr("cy",function(d: any) { return _this.elems.y(d.y) })
                 .attr("r",5)
@@ -194,7 +194,7 @@ var mouseleave = function(d: any, i: number, group: any) {
     .datum(this.metrics[0].get().data)
           .attr("class", "line")  // I add the class line to be able to modify this line later on.
       .attr("fill", "none")
-      .attr("stroke", "steelblue")
+      .attr("stroke", stringToColour(_this.metrics[0].get().name))
       .attr("stroke-width", 1.5)
       .attr("d", d3.line()
         .x(function(d:any) { return _this.elems.x2(d.x) })
